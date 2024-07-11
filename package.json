@@ -1,0 +1,24 @@
+{
+  "name": "api-vueschool-downloader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ndriodna/api-vueschool-downloader.git"
+  },
+  "keywords": [
+    "vueschool-downloader"
+  ],
+  "author": "ndriodna",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ndriodna/api-vueschool-downloader/issues"
+  },
+  "homepage": "https://github.com/ndriodna/api-vueschool-downloader#readme"
+}
