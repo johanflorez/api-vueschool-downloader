@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/ndriodna/api-vueschool-downloader/issues"
   },
-  "homepage": "https://github.com/ndriodna/api-vueschool-downloader#readme"
+  "homepage": "https://github.com/ndriodna/api-vueschool-downloader#readme",
+  "dependencies": {
+    "puppeteer": "^22.12.1",
+    "ws": "^8.18.0"
+  }
 }
