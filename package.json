@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/ndriodna/api-vueschool-downloader#readme",
   "dependencies": {
+    "dotenv": "^16.4.5",
     "puppeteer": "^22.12.1",
     "ws": "^8.18.0"
   }
