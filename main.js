@@ -3,9 +3,11 @@ import { routeHandler } from "./src/helper/httpRouter.js"
 import initRouter from "./src/router/router.js"
 import { WebSocketServer } from "ws"
 import { setupWS, initWS } from "./src/ws/websocketInit.js"
+import * as browserSession from "./src/controller/PuppeteerController.js"
 import dotenv from "dotenv";
 dotenv.config();
 
+await browserSession.initBrowser()
 initRouter()
 initWS()
 

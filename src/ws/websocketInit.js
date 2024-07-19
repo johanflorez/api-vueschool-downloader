@@ -1,9 +1,9 @@
-import { login } from "../controller/UserController.js"
+import { loginBrowser } from "../controller/UserController.js"
 import { wsHandlers, RegisterWsHandler } from "./wsHandlers.js"
 
 
 export function initWS() {
-    RegisterWsHandler('login', login)
+    RegisterWsHandler('login', loginBrowser)
     // RegisterWsHandler('getCourses', userController)
     // RegisterWsHandler('downloadCourses', userController)
 }

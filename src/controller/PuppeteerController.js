@@ -1,21 +1,20 @@
 import puppeteer from "puppeteer"
 
 let Browser = null
-
-export async function openBrowser() {
+export async function initBrowser() {
     if (!Browser) {
         Browser = await puppeteer.launch({ headless: true })
     }
-    return Browser
+
 }
 
-export async function closeBrowser(Browser) {
+export async function closeBrowser() {
     if (Browser) {
         await Browser.close()
         Browser = null
     }
 }
-export async function createPage(Browser) {
+export async function createPage() {
     if (!Browser) {
         throw new Error('Browser not launched yet')
     }
