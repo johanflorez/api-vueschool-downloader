@@ -47,7 +47,7 @@ export async function loginBrowser(socket, data, req) {
             type: "login",
             msg: 'success save cookies to local'
         }))
-        browserSession.close()
+        browserSession.closeBrowser()
     } catch (error) {
         socket.send(JSON.stringify({
             type: "login",
