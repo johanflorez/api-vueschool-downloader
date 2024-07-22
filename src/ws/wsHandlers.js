@@ -8,14 +8,13 @@ get all courses
 get selected courses
 {
 "type":"getSelectedCourses", 
-"courses":all courses list from getCourses type array [{id,title, thumbnail, checked: false}], 
-"selected": [1,2,3]
+"selected": [{id,title, url, thumbnail, checked: false}]
 }
 
 get each video lesson
 {
 "type":"getEachVideo",
-"data":[{id, title, thumbnail, checked: true, urls}]
+"data":[{id, title, url, thumbnail, checked: true, urls}]
 }
 
 downloader

@@ -44,14 +44,12 @@ export async function GetCourses(socket, data, req) {
 
 export async function GetSelectonLesson(socket, data, req) {
     try {
-        const courses = data.courses
-        const selected = data.selected
-        const selectedCourses = courses.filter((e) => selected.includes(e.id));
+        const selectedCourses = data.selected;
         for (let i = 0; i < selectedCourses.length; i++) {
             const page = await browserSession.createPage()
             socket.send(JSON.stringify({ type: "getCourses", status: "waiting for:", log: selectedCourses[i].url }));
             await page.goto(selectedCourses[i].url, { waitUntil: "networkidle2" });
-            socket.send({ type: "getCourses", status: "get url from: ", log: selectedCourses[i].url });
+            socket.send(JSON.stringify({ type: "getCourses", status: "get lesson each url from: ", log: selectedCourses[i].url }));
             const lessonUrl = await page.$$eval("a.title", (el) =>
                 el.map((e, i) => {
                     return e.getAttribute("href");
@@ -68,5 +66,27 @@ export async function GetSelectonLesson(socket, data, req) {
 }
 
 export async function GetVideoLesson(socket, data, req) {
+    try {
+        const lessons = data.videoLessons
+        const videoLesson = [];
+        for (let i = 0; i < lessons.length; i++) {
+            const videoUrls = [];
+            for (let j = 0; j < lessons[i].urls.length; j++) {
+                const page = await browserSession.createPage();
+                socket.send(`waiting for scraping video from: ${lessons[i].urls[j]}`);
+                await page.goto(lessons[i].urls[j], { waitUntil: "networkidle2" });
+                socket.send(`get url video from: ${lessons[i].urls[j]}`);
+                const video = await page.$eval("iframe", (e) => e.getAttribute("src"));
+                videoUrls.push(video);
+            }
+            const newLesson = { ...lessons[i] };
+            newLesson.videoUrls = videoUrls;
+            videoLesson.push(newLesson);
+            socket.send(JSON.stringify({ type: "getEachVideo", videosUrls: newLesson }))
+        }
+        socket.terminate()
+    } catch (error) {
+        console.log(error)
+    }
 
 }
