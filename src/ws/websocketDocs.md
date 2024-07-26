@@ -22,9 +22,9 @@
 > "data":[{id, title, url, thumbnail, checked: true, urls: []}]
 > }
 
-#### downloader
+#### createPath && downloader
 
 > {
-> "type":"downloader",
+> "type":"downloader", / type:"createPath"
 > "data":[{id, title, thumbnail, checked: true, urls: [], videosulrs: []}]
 > }

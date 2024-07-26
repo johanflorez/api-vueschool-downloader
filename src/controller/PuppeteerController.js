@@ -4,6 +4,7 @@ let Browser = null
 export async function initBrowser() {
     if (!Browser) {
         Browser = await puppeteer.launch({ headless: true })
+        console.log('init browser')
     }
 
 }

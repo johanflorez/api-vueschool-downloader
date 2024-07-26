@@ -42,7 +42,7 @@ export async function GetCourses(socket, data, req) {
 
 }
 
-export async function GetSelectonLesson(socket, data, req) {
+export async function GetSelectedLesson(socket, data, req) {
     try {
         const selectedCourses = data.selected;
         for (let i = 0; i < selectedCourses.length; i++) {
@@ -60,8 +60,11 @@ export async function GetSelectonLesson(socket, data, req) {
         socket.send(JSON.stringify(selectedCourses));
         socket.terminate()
     } catch (error) {
-        socket.send(error.message)
         console.log(error)
+        socket.send(JSON.stringify({ type: "getSelectedLesson", error: error.message }))
+        if (error.message.includes('timeout')) {
+            GetSelectedLesson(socket, data, req)
+        }
     }
 }
 
@@ -86,7 +89,10 @@ export async function GetVideoLesson(socket, data, req) {
         }
         socket.terminate()
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
+        socket.send(JSON.stringify({ type: "getEachVideo", error: error.message }))
+        if (error.message.includes('timeout')) {
+            GetSelectedLesson(socket, data, req)
+        }
     }
-
 }

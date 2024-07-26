@@ -1,4 +1,5 @@
-import { GetCourses, GetSelectonLesson, GetVideoLesson } from "../controller/CoursesController.js"
+import { GetCourses, GetSelectedLesson, GetVideoLesson } from "../controller/CoursesController.js"
+import { downloaderRunner } from "../controller/DownloadController.js"
 import { loginBrowser } from "../controller/UserController.js"
 import { wsHandlers, RegisterWsHandler } from "./wsHandlers.js"
 
@@ -6,8 +7,9 @@ import { wsHandlers, RegisterWsHandler } from "./wsHandlers.js"
 export function initWS() {
     RegisterWsHandler('login', loginBrowser)
     RegisterWsHandler('getCourses', GetCourses)
-    RegisterWsHandler('getSelectedLesson', GetSelectonLesson)
+    RegisterWsHandler('getSelectedLesson', GetSelectedLesson)
     RegisterWsHandler('getEachVideo', GetVideoLesson)
+    RegisterWsHandler('downloader', downloaderRunner)
 }
 
 export function setupWS(ws) {
