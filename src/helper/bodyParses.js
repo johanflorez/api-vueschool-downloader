@@ -1,16 +1,18 @@
-export default async function bodyParser(req) {
-    let body = ''
-    const contentType = req.headers['content-type']
-    if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('invalid request body type')
-    }
+export default function bodyParser(req) {
     return new Promise((resolve, reject) => {
-        req.on('data', data => {
-            body += data
+        let body = ''
+        const contentType = req.headers['content-type']
+        if (!contentType || !contentType.includes('application/json')) {
+            reject(new Error('invalid request body type'))
+            return
+        }
+        req.on('data', chunk => {
+            body += chunk.toString()
         })
         req.on('end', () => {
             try {
-                resolve(JSON.parse(body))
+                const bodyParsed = JSON.parse(body)
+                resolve(bodyParsed)
             } catch (error) {
                 reject(new Error('invalid json'))
             }

@@ -1,21 +1,26 @@
-const routes = {}
-function addRoute(method, path, handler) {
-    if (!routes[method]) {
-        routes[method] = {}
-    }
-    routes[method][path] = handler
+const routes = []
+function addRoute(method, path, ...handlers) {
+    routes.push({ method, path, handlers })
 }
 
 function routeHandler(req, res) {
-    const method = req.method
-    const url = req.url
+    const route = routes.find(r =>
+        r.method === req.method && r.path === req.url
+    )
+    let index = 0
 
-    if (routes[method] && routes[method][url]) {
-        return routes[method][url](req, res)
+    if (route) {
+        const next = () => {
+            if (index < route.handlers.length) {
+                route.handlers[index++](req, res, next)
+            }
+        }
+        next()
+    } else {
+        res.writeHeader(404, { 'Content-type': 'application/json' })
+        res.end('Not Found')
     }
 
-    res.writeHeader(404, { 'Content-type': 'application/json' })
-    res.end('Not Found')
 }
 
 export { routes, addRoute, routeHandler }

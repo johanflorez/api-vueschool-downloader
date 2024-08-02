@@ -69,7 +69,7 @@ export function downloader(socket, data, req, listPath) {
                     processNext()
                 })
             } else {
-                socket.send(JSON.stringify({ type: "downloader", msg: `Batch file not found in ${path}` }));
+                socket.send(JSON.stringify({ type: "downloader", msg: `Batch file not found in ${listPath[currentIndex]}` }));
                 currentIndex++
                 processNext()
             }

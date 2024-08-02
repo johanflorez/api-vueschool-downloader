@@ -4,10 +4,12 @@ import * as browserSession from "./PuppeteerController.js"
 import fs from "node:fs"
 
 let auth = null
-export async function login(req, res) {
+export function login(req, res) {
     try {
-        auth = await bodyParser(req)
-        return responseBody(201, res, 'trying to login')
+        if (req.body) {
+            auth = req.body
+            return responseBody(201, res, 'trying to login')
+        }
     } catch (error) {
         return responseBody(403, res, error.message)
     }
