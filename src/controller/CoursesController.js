@@ -17,7 +17,7 @@ export async function GetCourses(socket, data, req) {
     try {
         const cookies = await getAuthh(socket, data, req)
         const page = await browserSession.createPage()
-        await page.goto(coursesUrl, { waitUntil: "networkidle2" });
+        await page.goto(coursesUrl, { waitUntil: "networkidle0" });
         socket.send("set cookies on page")
         await page.setCookie(...cookies)
         socket.send("trying to scrap all courses")
@@ -45,30 +45,38 @@ export async function GetCourses(socket, data, req) {
 export async function GetSelectedLesson(socket, data, req) {
     try {
         const selectedCourses = data.selected;
-        for (let i = 0; i < selectedCourses.length; i++) {
-            const page = await browserSession.createPage()
-            socket.send(JSON.stringify({ type: "getCourses", status: "waiting for:", log: selectedCourses[i].url }));
-            await page.goto(selectedCourses[i].url, { waitUntil: "networkidle2" });
-            socket.send(JSON.stringify({ type: "getCourses", status: "get lesson each url from: ", log: selectedCourses[i].url }));
-            const lessonUrl = await page.$$eval("a.title", (el) =>
-                el.map((e, i) => {
-                    return e.getAttribute("href");
-                })
-            );
-            Object.assign(selectedCourses[i], { urls: lessonUrl.slice() });
+        if (selectedCourses?.length > 0) {
+            for (let i = 0; i < selectedCourses.length; i++) {
+                const page = await browserSession.createPage()
+                socket.send(JSON.stringify({ type: "getCourses", status: "waiting for:", log: selectedCourses[i].url }));
+                await page.goto(selectedCourses[i].url, { waitUntil: "networkidle0" });
+                socket.send(JSON.stringify({ type: "getCourses", status: "get lesson each url from: ", log: selectedCourses[i].url }));
+                const lessonUrl = await page.$$eval("a.title", (el) =>
+                    el.map((e, i) => {
+                        return e.getAttribute("href");
+                    })
+                );
+                Object.assign(selectedCourses[i], { urls: lessonUrl.slice() });
+                await page.close()
+            }
+            socket.send(JSON.stringify(selectedCourses));
+            socket.terminate()
+        } else {
+            socket.send(JSON.stringify({ type: 'getSelectedCourses', msg: 'select atleast one course' }));
         }
-        socket.send(JSON.stringify(selectedCourses));
-        socket.terminate()
     } catch (error) {
         console.log(error)
         socket.send(JSON.stringify({ type: "getSelectedLesson", error: error.message }))
         if (error.message.includes('timeout')) {
-            GetSelectedLesson(socket, data, req)
+            socket.send(JSON.stringify({ type: 'getSelectedCourses', msg: 'timeout retry scraping' }))
+            await GetSelectedLesson(socket, data, req)
         }
     }
 }
 
 export async function GetVideoLesson(socket, data, req) {
+    let index = 0
+    const maxRetry = 3
     try {
         const lessons = data.videoLessons
         const videoLesson = [];
@@ -76,11 +84,14 @@ export async function GetVideoLesson(socket, data, req) {
             const videoUrls = [];
             for (let j = 0; j < lessons[i].urls.length; j++) {
                 const page = await browserSession.createPage();
-                socket.send(`waiting for scraping video from: ${lessons[i].urls[j]}`);
+                socket.send(JSON.stringify({ type: 'getEachVide', msg: `waiting for scraping video from: ${lessons[i].urls[j]}` }));
                 await page.goto(lessons[i].urls[j], { waitUntil: "networkidle2" });
-                socket.send(`get url video from: ${lessons[i].urls[j]}`);
+                socket.send(JSON.stringify({ type: 'getEachVideo', msg: `get url video from: ${lessons[i].urls[j]}` }));
+                await page.waitForSelector('iframe', { timeout: 0 })
                 const video = await page.$eval("iframe", (e) => e.getAttribute("src"));
                 videoUrls.push(video);
+                socket.send(JSON.stringify({ type: 'getEachVideo', msg: `success scrap video from: ${lessons[i].urls[j]}` }))
+                await page.close()
             }
             const newLesson = { ...lessons[i] };
             newLesson.videoUrls = videoUrls;
@@ -89,10 +100,18 @@ export async function GetVideoLesson(socket, data, req) {
         }
         socket.terminate()
     } catch (error) {
+
         console.log(error.message)
         socket.send(JSON.stringify({ type: "getEachVideo", error: error.message }))
         if (error.message.includes('timeout')) {
-            GetSelectedLesson(socket, data, req)
+            if (index < maxRetry) {
+                index++
+                socket.send(JSON.stringify({ type: 'getEachVideo', msg: 'timeout, retry scraping' }))
+                await GetVideoLesson(socket, data, req)
+            } else {
+                socket.send(JSON.stringify({ type: 'getEachVideo', msg: 'already reach max retry, please check your internet connection' }))
+                socket.terminate()
+            }
         }
     }
 }
