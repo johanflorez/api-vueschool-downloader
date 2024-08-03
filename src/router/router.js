@@ -1,5 +1,5 @@
 import { login } from '../controller/UserController.js'
-import { addRoute } from '../helper/httpRouter.js'
+import { addRoute } from './routeHandler.js'
 import { AuthMiddleware } from '../helper/Middleware.js'
 
 export default function initRouter() {

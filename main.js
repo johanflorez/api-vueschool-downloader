@@ -1,5 +1,5 @@
 import http from "http"
-import { routeHandler } from "./src/helper/httpRouter.js"
+import { routeHandler } from "./src/router/routeHandler.js"
 import initRouter from "./src/router/router.js"
 import { WebSocketServer } from "ws"
 import { setupWS, initWS } from "./src/ws/websocketInit.js"
