@@ -17,9 +17,7 @@ export function wsHandlers(socket, msg, req) {
         }
         next()
     } else {
-        socket.send(JSON.stringify({ type: 'error', msg: 'type not found' }))
+        socket.send(JSON.stringify({ type: 'error', msg: 'data send type not JSON or type not found' }))
     }
-    // socket.send(JSON.stringify({ type: 'error', msg: 'data send type not JSON' }))
-
 }
 
