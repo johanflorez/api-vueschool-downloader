@@ -15,15 +15,15 @@ export function login(req, res) {
     }
 }
 
-export async function loginBrowser(socket, data, req) {
+export async function loginBrowser(ws, data, req) {
     try {
         const page = await browserSession.createPage()
-        socket.send(JSON.stringify({
+        ws.send(JSON.stringify({
             type: "login",
             msg: "open browser"
         }))
         await page.goto("https://vueschool.io/login")
-        socket.send(JSON.stringify({
+        ws.send(JSON.stringify({
             type: "login",
             msg: "opening login page",
         }))
@@ -34,24 +34,24 @@ export async function loginBrowser(socket, data, req) {
         await passwordFill.press("Enter");
         await page.waitForNavigation();
         await page.goto("https://vueschool.io/profile/account");
-        socket.send(JSON.stringify({
+        ws.send(JSON.stringify({
             type: "login",
             msg: "success login"
         }))
-        socket.send(JSON.stringify({
+        ws.send(JSON.stringify({
             type: "login",
             msg: "get cookies"
         }))
         let authCookies = await page.cookies();
         authCookies = JSON.stringify(authCookies);
         fs.writeFileSync("./cookies.txt", authCookies);
-        socket.send(JSON.stringify({
+        ws.send(JSON.stringify({
             type: "login",
             msg: 'success save cookies to local'
         }))
         browserSession.closeBrowser()
     } catch (error) {
-        socket.send(JSON.stringify({
+        ws.send(JSON.stringify({
             type: "login",
             msg: error.message
         }))

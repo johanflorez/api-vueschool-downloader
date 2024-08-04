@@ -10,7 +10,7 @@ export async function initBrowser() {
                 '--dns-over-https-resolver=https://cloudflare-dns.com/dns-query'
             ]
         })
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        // await new Promise(resolve => setTimeout(resolve, 5000));
         console.log('init browser')
     }
 

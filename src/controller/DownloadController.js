@@ -29,12 +29,12 @@ export function createPath(data) {
 
 }
 
-export function downloader(socket, data, req, listPath) {
+export function downloader(ws, data, req, listPath) {
     return new Promise((resolve, reject) => {
         let currentIndex = 0
         function processNext() {
             if (currentIndex >= listPath.length) {
-                resolve(socket.send(JSON.stringify({ type: "downloader", msg: "download complete please check output folder" })))
+                resolve(ws.send(JSON.stringify({ type: "downloader", msg: "download complete please check output folder" })))
                 return
             }
 
@@ -49,27 +49,27 @@ export function downloader(socket, data, req, listPath) {
                     "-f bv*"
                 ]);
                 childProcess.stdout.on("data", (data) => {
-                    socket.send(JSON.stringify({ type: "downloader", log: data }))
+                    ws.send(JSON.stringify({ type: "downloader", log: data }))
                 });
                 childProcess.stderr.on("data", (data) => {
-                    socket.send(JSON.stringify({ type: "downloader", log: data }))
+                    ws.send(JSON.stringify({ type: "downloader", log: data }))
                 });
                 childProcess.on("error", (err) => {
-                    socket.send(JSON.stringify({ type: "downloader", msg: err }))
+                    ws.send(JSON.stringify({ type: "downloader", msg: err }))
                     currentIndex++
                     processNext()
                 });
                 childProcess.on('close', (code) => {
                     if (code !== 0) {
-                        reject(socket.send(JSON.stringify({ type: "downloader", msg: "exit with error code " + code })))
+                        reject(ws.send(JSON.stringify({ type: "downloader", msg: "exit with error code " + code })))
                     } else {
-                        socket.send(JSON.stringify({ type: "downloader", msg: `Download complete for ${listPath[currentIndex]}` }));
+                        ws.send(JSON.stringify({ type: "downloader", msg: `Download complete for ${listPath[currentIndex]}` }));
                     }
                     currentIndex++
                     processNext()
                 })
             } else {
-                socket.send(JSON.stringify({ type: "downloader", msg: `Batch file not found in ${listPath[currentIndex]}` }));
+                ws.send(JSON.stringify({ type: "downloader", msg: `Batch file not found in ${listPath[currentIndex]}` }));
                 currentIndex++
                 processNext()
             }
@@ -79,12 +79,12 @@ export function downloader(socket, data, req, listPath) {
 }
 
 
-export async function downloaderRunner(socket, data, req) {
+export async function downloaderRunner(ws, data, req) {
     try {
         const listPath = await createPath(data)
-        await downloader(socket, data, req, listPath)
+        await downloader(ws, data, req, listPath)
     } catch (error) {
         console.log(error)
-        socket.send(JSON.stringify({ type: "downloader", error: error.message }))
+        ws.send(JSON.stringify({ type: "downloader", error: error.message }))
     }
 }

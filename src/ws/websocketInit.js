@@ -1,6 +1,7 @@
 import { GetCourses, GetSelectedLesson, GetVideoLesson } from "../controller/CoursesController.js"
 import { downloaderRunner } from "../controller/DownloadController.js"
 import { loginBrowser } from "../controller/UserController.js"
+import { websocketMiddlewareUpgrade } from "../helper/Middleware.js"
 import { wsHandlers, RegisterWsHandler } from "./wsHandlers.js"
 
 
@@ -12,22 +13,34 @@ export function initWS() {
     RegisterWsHandler('downloader', downloaderRunner)
 }
 
-export function setupWS(ws) {
-    ws.on('connection', (socket, req) => {
+export function setupWS(server, wss) {
+    server.on('upgrade', (req, socket, head) => {
+        if (req.headers['websocket-key'] != 'secret-key') {
+            socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
+            socket.destroy()
+            return
+        }
+        wss.handleUpgrade(req, socket, head, (ws) => {
+            wss.emit('connection', ws, req)
+        })
+    })
+    wss.on('connection', (ws, req) => {
         console.log('client connected')
 
-        socket.on('message', (msg) => {
-            wsHandlers(socket, msg, req)
+        ws.on('message', (msg) => {
+            wsHandlers(ws, msg, req)
         })
 
-        socket.on('close', (msg) => {
+        ws.on('close', (msg) => {
             console.log('client closed connection', msg)
+            ws.send('client disconnected')
         })
 
-        socket.on('error', console.error)
+        ws.on('error', console.error)
 
     })
-    ws.on('close', () => {
+
+    wss.on('close', () => {
         console.log('server socket closed')
     })
 }

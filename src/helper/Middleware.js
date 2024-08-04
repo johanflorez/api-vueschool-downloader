@@ -15,7 +15,11 @@ export async function AuthMiddleware(req, res, next) {
     }
 }
 
-export function websocketMiddleware(socket, msg, req) {
+export function websocketMiddlewareUpgrade(req, socket, head) {
+
+}
+
+export function websocketMiddlewareMessage(socket, msg, req) {
     try {
 
     } catch (error) {

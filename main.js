@@ -1,4 +1,4 @@
-import http from "http"
+import { createServer } from "http"
 import { routeHandler } from "./src/router/routeHandler.js"
 import initRouter from "./src/router/router.js"
 import { WebSocketServer } from "ws"
@@ -11,10 +11,10 @@ await browserSession.initBrowser()
 initRouter()
 initWS()
 
-const server = http.createServer(routeHandler)
-const ws = new WebSocketServer({ server })
+const server = createServer(routeHandler)
+const wss = new WebSocketServer({ noServer: true })
 
-setupWS(ws)
+setupWS(server, wss)
 
 const port = 3000
 console.log(`server listen: http://localhost:${port}`)
