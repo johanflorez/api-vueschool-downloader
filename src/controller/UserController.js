@@ -1,4 +1,3 @@
-import bodyParser from "../helper/bodyParses.js"
 import { responseBody } from "../helper/response.js"
 import * as browserSession from "./PuppeteerController.js"
 import fs from "node:fs"
@@ -14,6 +13,20 @@ export function login(req, res) {
         return responseBody(403, res, error.message)
     }
 }
+
+export function getAuth(ws, data, req) {
+    return new Promise((resolve, reject) => {
+        try {
+            const getAuth = fs.readFileSync("./cookies.txt");
+            const cookies = JSON.parse(getAuth);
+            ws.send("cookies found!");
+            resolve(cookies)
+        } catch (error) {
+            reject(new Error('cookies not found please remove cookies file on project folder and try re-login'))
+        }
+    })
+}
+
 
 export async function loginBrowser(ws, data, req) {
     try {
@@ -50,10 +63,12 @@ export async function loginBrowser(ws, data, req) {
             msg: 'success save cookies to local'
         }))
         browserSession.closeBrowser()
+        ws.terminate()
     } catch (error) {
         ws.send(JSON.stringify({
             type: "login",
             msg: error.message
         }))
+        ws.terminate()
     }
 }
