@@ -1,5 +1,6 @@
 import bodyParser from "./bodyParses.js"
 import { responseBody } from "./response.js"
+import { getAuth } from "../controller/UserController.js"
 
 export async function AuthMiddleware(req, res, next) {
     try {
@@ -16,13 +17,19 @@ export async function AuthMiddleware(req, res, next) {
 }
 
 export function websocketMiddlewareUpgrade(req, socket, head) {
-
+    if (req.headers['websocket-key'] != 'secret-key') {
+        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
+        socket.destroy()
+        return
+    }
 }
 
-export function websocketMiddlewareMessage(socket, msg, req) {
+export async function websocketMiddlewareMessage(ws, msg, req, next) {
     try {
-
+        const cookies = await getAuth(ws, msg, req)
+        req.cookies = cookies
+        next()
     } catch (error) {
-
+        ws.send(JSON.stringify({ type: 'login', message: error }))
     }
 }
