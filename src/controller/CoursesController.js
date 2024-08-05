@@ -2,20 +2,9 @@ import * as browserSession from "./PuppeteerController.js"
 import fs from "fs"
 
 const coursesUrl = "https://vueschool.io/courses"
-async function getAuthh(ws, data, req) {
-    try {
-        let getAuth = fs.readFileSync("./cookies.txt");
-        const cookies = JSON.parse(getAuth);
-        ws.send("cookies found!");
-        return cookies
-    } catch (error) {
-        ws.send(error.message)
-    }
-}
-
 export async function GetCourses(ws, data, req) {
     try {
-        const cookies = await getAuthh(ws, data, req)
+        const cookies = req.cookies
         const page = await browserSession.createPage()
         await page.goto(coursesUrl, { waitUntil: "networkidle0" });
         ws.send("set cookies on page")
@@ -34,6 +23,7 @@ export async function GetCourses(ws, data, req) {
                 return { id: i, title, url, thumbnail, checked: false };
             });
         });
+        await page.close()
         ws.send(JSON.stringify(getEachCourse))
         ws.terminate()
     } catch (error) {
