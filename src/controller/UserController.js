@@ -62,7 +62,7 @@ export async function loginBrowser(ws, data, req) {
             type: "login",
             msg: 'success save cookies to local'
         }))
-        browserSession.closeBrowser()
+        await page.close()
         ws.terminate()
     } catch (error) {
         ws.send(JSON.stringify({
