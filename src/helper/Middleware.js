@@ -1,6 +1,7 @@
 import bodyParser from "./bodyParses.js"
 import { responseBody } from "./response.js"
 import { getAuth } from "../controller/UserController.js"
+import { verifyToken } from "./jwt.js"
 
 export async function AuthMiddleware(req, res, next) {
     try {
@@ -28,6 +29,10 @@ export async function websocketMiddlewareMessage(ws, msg, req, next) {
     try {
         const cookies = await getAuth(ws, msg, req)
         req.cookies = cookies
+        const tokenJwt = req.headers['authorization']
+        if (!tokenJwt) return new Error('unathorized')
+        verifyToken(tokenJwt)
+        ws.send('success verify token')
         next()
     } catch (error) {
         ws.send(JSON.stringify({ type: 'login', message: error }))

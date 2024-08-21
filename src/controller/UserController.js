@@ -1,3 +1,4 @@
+import { signToken } from "../helper/jwt.js"
 import { responseBody } from "../helper/response.js"
 import * as browserSession from "./PuppeteerController.js"
 import fs from "node:fs"
@@ -58,9 +59,12 @@ export async function loginBrowser(ws, data, req) {
         let authCookies = await page.cookies();
         authCookies = JSON.stringify(authCookies);
         fs.writeFileSync("./cookies.txt", authCookies);
+        const jwtToken = signToken(authCookies)
+
         ws.send(JSON.stringify({
             type: "login",
-            msg: 'success save cookies to local'
+            msg: 'success save cookies to local',
+            token: jwtToken
         }))
         await page.close()
         ws.terminate()
