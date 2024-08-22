@@ -27,14 +27,15 @@ export function websocketMiddlewareUpgrade(req, socket, head) {
 
 export async function websocketMiddlewareMessage(ws, msg, req, next) {
     try {
-        const cookies = await getAuth(ws, msg, req)
+        const headerToken = req.headers['authorization']
+        if (!headerToken) {
+            throw new Error('token not found')
+        }
+        const decode = await verifyToken(headerToken)
+        const cookies = JSON.parse(decode.payload)
         req.cookies = cookies
-        const tokenJwt = req.headers['authorization']
-        if (!tokenJwt) return new Error('unathorized')
-        verifyToken(tokenJwt)
-        ws.send('success verify token')
         next()
-    } catch (error) {
-        ws.send(JSON.stringify({ type: 'login', message: error }))
+    } catch (e) {
+        ws.send(JSON.stringify({ type: 'login', message: e.message }))
     }
 }
