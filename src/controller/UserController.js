@@ -58,7 +58,6 @@ export async function loginBrowser(ws, data, req) {
         }))
         let authCookies = await page.cookies();
         authCookies = JSON.stringify(authCookies);
-        fs.writeFileSync("./cookies.txt", authCookies);
         const jwtToken = signToken(authCookies)
 
         ws.send(JSON.stringify({
