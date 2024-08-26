@@ -4,7 +4,7 @@ const secretToken = 'jwt-puppeteer-secret-keys'
 
 export function signToken(payload) {
     try {
-        const tokenSign = jwt.sign({ payload }, secretToken)
+        const tokenSign = jwt.sign({ payload }, secretToken, { expiresIn: '1d' })
         return tokenSign
     } catch (error) {
         throw new Error(error.message)
