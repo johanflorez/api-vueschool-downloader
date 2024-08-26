@@ -15,20 +15,6 @@ export function login(req, res) {
     }
 }
 
-export function getAuth(ws, data, req) {
-    return new Promise((resolve, reject) => {
-        try {
-            const getAuth = fs.readFileSync("./cookies.txt");
-            const cookies = JSON.parse(getAuth);
-            ws.send("cookies found!");
-            resolve(cookies)
-        } catch (error) {
-            reject(new Error('cookies not found please remove cookies file on project folder and try re-login'))
-        }
-    })
-}
-
-
 export async function loginBrowser(ws, data, req) {
     try {
         const page = await browserSession.createPage()
@@ -59,10 +45,9 @@ export async function loginBrowser(ws, data, req) {
         let authCookies = await page.cookies();
         authCookies = JSON.stringify(authCookies);
         const jwtToken = signToken(authCookies)
-
         ws.send(JSON.stringify({
             type: "login",
-            msg: 'success save cookies to local',
+            msg: 'success generate cookies to jwt',
             token: jwtToken
         }))
         await page.close()
