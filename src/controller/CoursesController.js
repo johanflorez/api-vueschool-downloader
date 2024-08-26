@@ -4,11 +4,9 @@ import fs from "fs"
 const coursesUrl = "https://vueschool.io/courses"
 export async function GetCourses(ws, data, req) {
     try {
-        const cookies = req.cookies
         const page = await browserSession.createPage()
         await page.goto(coursesUrl, { waitUntil: "networkidle0" });
-        ws.send("set cookies on page")
-        await page.setCookie(...cookies)
+        await page.reload({ waitUntil: "networkidle0" })
         ws.send("trying to scrap all courses")
         const getEachCourse = await page.$$eval("a.thumb-card", (el) => {
             return el.map((e, i) => {
