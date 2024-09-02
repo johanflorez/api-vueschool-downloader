@@ -40,13 +40,16 @@ export function downloader(ws, data, req, listPath) {
 
             if (fs.existsSync(`${listPath[currentIndex]}/${batchFile}`)) {
                 const childProcess = execFile("./yt-dlp.exe", [
+                    "--ffmpeg-location",
+                    "C:/Users/HSN16/AppData/Local/Microsoft/WinGet/Links/ffmpeg.exe",
                     "--refer",
                     "https://vueschool.io/",
+                    "-f",
+                    "`bv+ba`",
                     "--batch-file",
                     `${listPath[currentIndex]}/${batchFile}`,
                     "--paths",
-                    `${listPath[currentIndex]}/video`,
-                    "-f bv*"
+                    `${listPath[currentIndex]}/video`
                 ]);
                 childProcess.stdout.on("data", (data) => {
                     ws.send(JSON.stringify({ type: "downloader", log: data }))

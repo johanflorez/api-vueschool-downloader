@@ -1,6 +1,5 @@
 import bodyParser from "./bodyParses.js"
 import { responseBody } from "./response.js"
-import { getAuth } from "../controller/UserController.js"
 import { verifyToken } from "./jwt.js"
 
 export async function AuthMiddleware(req, res, next) {
