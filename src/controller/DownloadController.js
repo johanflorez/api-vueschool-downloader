@@ -1,6 +1,7 @@
 import fs from "fs"
 import { execFile } from 'node:child_process';
 const batchFile = 'batch.txt'
+const libPath = './lib/'
 export function createPath(data) {
     return new Promise((resolve, reject) => {
         const videosLesson = data.data
@@ -39,9 +40,9 @@ export function downloader(ws, data, req, listPath) {
             }
 
             if (fs.existsSync(`${listPath[currentIndex]}/${batchFile}`)) {
-                const childProcess = execFile("./yt-dlp.exe", [
+                const childProcess = execFile(`${libPath}yt-dlp.exe`, [
                     "--ffmpeg-location",
-                    "C:/Users/HSN16/AppData/Local/Microsoft/WinGet/Links/ffmpeg.exe",
+                    `${libPath}ffmpeg.exe`,
                     "--refer",
                     "https://vueschool.io/",
                     "-f",
