@@ -1,3 +1,5 @@
+import wsSend from "../helper/wsSend.js"
+
 const handlers = []
 
 export function RegisterWsHandler(type, ...handler) {
@@ -17,10 +19,10 @@ export function wsHandlers(socket, msg, req) {
             }
             next()
         } else {
-            socket.send(JSON.stringify({ type: 'error', msg: 'type not found' }))
+            wsSend(socket, 'error', 3, 'type not found')
         }
     } catch (error) {
-        socket.send(JSON.stringify({ type: 'error', msg: 'data send is not JSON' }))
+        wsSend(socket, 'error', 3, 'data send is not JSON')
     }
 }
 

@@ -1,6 +1,8 @@
 import bodyParser from "./bodyParses.js"
 import { responseBody } from "./response.js"
 import { verifyToken } from "./jwt.js"
+import { readFileSync, existsSync } from 'node:fs';
+import wsSend from "./wsSend.js";
 
 export async function AuthMiddleware(req, res, next) {
     try {
@@ -24,17 +26,21 @@ export function websocketMiddlewareUpgrade(req, socket, head) {
     }
 }
 
-export async function websocketMiddlewareMessage(ws, msg, req, next) {
+export async function websocketMiddlewareMessage(ws, data, req, next) {
     try {
-        const headerToken = req.headers['authorization']
-        if (!headerToken) {
-            throw new Error('token not found')
+        if (existsSync('./cookies.txt')) {
+            const cookieFile = readFileSync('./cookies.txt', 'utf-8')
+            const token = data.token
+            if (!token) {
+                return new Error('token not found')
+            }
+            await verifyToken(token)
+            req.cookies = JSON.parse(cookieFile)
+            next()
+        } else {
+            wsSend(ws, 'error', 3, 'cookies not found')
         }
-        const decode = await verifyToken(headerToken)
-        const cookies = JSON.parse(decode.payload)
-        req.cookies = cookies
-        next()
     } catch (e) {
-        ws.send(JSON.stringify({ type: 'login', message: e.message }))
+        wsSend(ws, 'error', 3, e.message)
     }
 }

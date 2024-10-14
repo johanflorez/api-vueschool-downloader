@@ -1,3 +1,4 @@
+
 const routes = []
 function addRoute(method, path, ...handlers) {
     routes.push({ method, path, handlers })
@@ -6,7 +7,8 @@ function addRoute(method, path, ...handlers) {
 function routeHandler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader('Access-Control-Max-Age', '86400');
 
     // Handle preflight request
     if (req.method === 'OPTIONS') {
@@ -18,8 +20,8 @@ function routeHandler(req, res) {
     const route = routes.find(r =>
         r.method === req.method && r.path === req.url
     )
-    let index = 0
 
+    let index = 0
     if (route) {
         const next = () => {
             if (index < route.handlers.length) {

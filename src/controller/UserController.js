@@ -1,9 +1,11 @@
-import { signToken } from "../helper/jwt.js"
+import { signToken, verifyToken } from "../helper/jwt.js"
 import { responseBody } from "../helper/response.js"
+import wsSend from "../helper/wsSend.js"
 import * as browserSession from "./PuppeteerController.js"
-import fs from "node:fs"
+import { writeFileSync, readFileSync, existsSync } from "node:fs"
 
-let auth = null
+let auth
+const cookiesPath = './cookies.txt'
 export function login(req, res) {
     try {
         if (req.body) {
@@ -15,48 +17,64 @@ export function login(req, res) {
     }
 }
 
+export async function isAuth(req, res) {
+    try {
+        if (existsSync('./cookies.txt')) {
+            const headerToken = req.headers['token_client']
+            if (!headerToken) {
+                throw new Error('token not found')
+            }
+            const decode = await verifyToken(headerToken)
+            return responseBody(200, res, decode.email)
+        }
+        return responseBody(404, res, 'Cookies not found, please re-login')
+    } catch (error) {
+        return responseBody(401, res, error.message)
+    }
+}
+
 export async function loginBrowser(ws, data, req) {
     try {
+        const url = "https://vueschool.io/login"
         const page = await browserSession.createPage()
-        ws.send(JSON.stringify({
-            type: "login",
-            msg: "open browser"
-        }))
-        await page.goto("https://vueschool.io/login")
-        ws.send(JSON.stringify({
-            type: "login",
-            msg: "opening login page",
-        }))
+
+        wsSend(ws, 'login', 2, 'run scraping login, please wait...')
+        await page.goto(url)
+        const getUrl = await page.url()
+        if (getUrl != url) {
+            wsSend(ws, 'login', 2, 'redirect to home')
+            ws.terminate()
+            return
+        }
+
         const emailFill = await page.$('input[type="text"]');
-        await emailFill.type(auth.email);
         const passwordFill = await page.$('input[type="password"]');
+
+        await emailFill.type(auth.email);
         await passwordFill.type(auth.password);
         await passwordFill.press("Enter");
+
         await page.waitForNavigation();
         await page.goto("https://vueschool.io/profile/account");
-        ws.send(JSON.stringify({
-            type: "login",
-            msg: "success login"
-        }))
-        ws.send(JSON.stringify({
-            type: "login",
-            msg: "get cookies"
-        }))
-        let authCookies = await page.cookies();
-        authCookies = JSON.stringify(authCookies);
-        const jwtToken = signToken(authCookies)
-        ws.send(JSON.stringify({
-            type: "login",
-            msg: 'success generate cookies to jwt',
-            token: jwtToken
-        }))
+
+        console.log('get cookies scraping')
+        const authCookies = await page.cookies();
+
+        const saveAuthCookies = JSON.stringify(authCookies);
+        writeFileSync(cookiesPath, saveAuthCookies);
+        console.log('save cookies to local')
+        const payload = {
+            email: auth.email
+        }
+        const token = await signToken(payload)
+
+        wsSend(ws, 'login', 1, token)
+
         await page.close()
         ws.terminate()
     } catch (error) {
-        ws.send(JSON.stringify({
-            type: "login",
-            msg: error.message
-        }))
+        wsSend(ws, 'login', 3, error.message)
         ws.terminate()
+        console.log(error)
     }
 }

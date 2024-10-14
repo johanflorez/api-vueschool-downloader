@@ -14,25 +14,27 @@ export function initWS() {
 }
 
 export function setupWS(server, wss) {
-    server.on('upgrade', (req, socket, head) => {
-        wss.handleUpgrade(req, socket, head, (ws) => {
-            wss.emit('connection', ws, req)
-        })
-    })
+
     wss.on('connection', (ws, req) => {
         console.log('client connected')
 
-        ws.on('message', (msg) => {
-            wsHandlers(ws, msg, req)
+        ws.on('message', (data) => {
+            wsHandlers(ws, data, req)
         })
 
-        ws.on('close', (msg) => {
-            console.log('client closed connection', msg)
+        ws.on('close', (data) => {
+            console.log('client closed connection', data)
             ws.send('client disconnected')
         })
 
         ws.on('error', console.error)
 
+    })
+
+    server.on('upgrade', (req, socket, head) => {
+        wss.handleUpgrade(req, socket, head, (ws) => {
+            wss.emit('connection', ws, req)
+        })
     })
 
     wss.on('close', () => {
