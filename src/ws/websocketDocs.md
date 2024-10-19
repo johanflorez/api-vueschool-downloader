@@ -11,7 +11,7 @@
 #### get selected courses
 
 > {
-> "type":"getSelectedCourses",
+> "type":"getSelectedLesson",
 > "selected": [{id,title, url, thumbnail, checked: false}]
 > }
 

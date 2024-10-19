@@ -38,9 +38,9 @@ export async function GetSelectedLesson(ws, data, req) {
         if (selectedCourses?.length > 0) {
             for (let i = 0; i < selectedCourses.length; i++) {
                 const page = await browserSession.createPage()
-                wsSend(ws, 'getSelectedCourses', 2, `waiting for : ${selectedCourses[i].url}`)
+                wsSend(ws, 'getSelectedLesson', 2, `waiting for : ${selectedCourses[i].url}`)
                 await page.goto(selectedCourses[i].url, { waitUntil: "networkidle0" });
-                wsSend(ws, 'getSelectedCourses', 2, `get lesson each url from: ${selectedCourses[i].url}`)
+                wsSend(ws, 'getSelectedLesson', 2, `get lesson each url from: ${selectedCourses[i].url}`)
                 const lessonUrl = await page.$$eval("a.title", (el) =>
                     el.map((e, i) => {
                         return e.getAttribute("href");
@@ -49,16 +49,16 @@ export async function GetSelectedLesson(ws, data, req) {
                 Object.assign(selectedCourses[i], { urls: lessonUrl.slice() });
                 await page.close()
             }
-            wsSend(ws, 'getSelectedCourses', 1, selectedCourses)
+            wsSend(ws, 'getSelectedLesson', 1, selectedCourses)
             ws.terminate()
         } else {
-            wsSend(ws, 'getSelectedCourses', 0, 'select atleast one course')
+            wsSend(ws, 'error', 0, 'select atleast one course')
         }
     } catch (error) {
         console.log(error)
-        wsSend(ws, 'getSelectedCourses', 3, error.message)
+        wsSend(ws, 'error', 3, error.message)
         if (error.message.includes('timeout')) {
-            wsSend(ws, 'getSelectedCourses', 3, 'timeout retry scraping')
+            wsSend(ws, 'error', 3, 'timeout retry scraping')
             await GetSelectedLesson(ws, data, req)
         }
     }

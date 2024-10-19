@@ -28,17 +28,15 @@ export function websocketMiddlewareUpgrade(req, socket, head) {
 
 export async function websocketMiddlewareMessage(ws, data, req, next) {
     try {
+        const token = data.token
+        if (!token) throw new Error('token not found')
         if (existsSync('./cookies.txt')) {
             const cookieFile = readFileSync('./cookies.txt', 'utf-8')
-            const token = data.token
-            if (!token) {
-                return new Error('token not found')
-            }
             await verifyToken(token)
             req.cookies = JSON.parse(cookieFile)
             next()
         } else {
-            wsSend(ws, 'error', 3, 'cookies not found')
+            wsSend(ws, 'error', 3, 'cookies not found, please re-login')
         }
     } catch (e) {
         wsSend(ws, 'error', 3, e.message)
