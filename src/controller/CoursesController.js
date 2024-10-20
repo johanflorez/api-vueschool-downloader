@@ -38,16 +38,17 @@ export async function GetSelectedLesson(ws, data, req) {
         if (selectedCourses?.length > 0) {
             for (let i = 0; i < selectedCourses.length; i++) {
                 const page = await browserSession.createPage()
-                wsSend(ws, 'getSelectedLesson', 2, `waiting for : ${selectedCourses[i].url}`)
+                wsSend(ws, 'getSelectedLesson', 2, `waiting for : ${selectedCourses[i].title}`)
                 await page.goto(selectedCourses[i].url, { waitUntil: "networkidle0" });
-                wsSend(ws, 'getSelectedLesson', 2, `get lesson each url from: ${selectedCourses[i].url}`)
+                wsSend(ws, 'getSelectedLesson', 2, `get each lesson url from: ${selectedCourses[i].title}`)
                 const lessonUrl = await page.$$eval("a.title", (el) =>
                     el.map((e, i) => {
-                        return e.getAttribute("href");
+                        return { url: e.getAttribute("href"), titleLesson: e.innerText };
                     })
                 );
                 Object.assign(selectedCourses[i], { urls: lessonUrl.slice() });
                 await page.close()
+                wsSend(ws, 'getSelectedLesson', 2, `success get each lesson from: ${selectedCourses[i].title}`)
             }
             wsSend(ws, 'getSelectedLesson', 1, selectedCourses)
             ws.terminate()
@@ -99,7 +100,7 @@ export async function GetVideoLesson(ws, data, req) {
                 wsSend(ws, 'getEachVideo', 3, `timeout, retry scraping`)
                 await GetVideoLesson(ws, data, req)
             } else {
-                wsSend(ws, 'getEachVideo', 3, `already reach max retry, please check your internet connection`)
+                wsSend(ws, 'getEachVideo', 3, `already reach max retry, please check your internet connection & retry download from start`)
                 ws.terminate()
             }
         }
