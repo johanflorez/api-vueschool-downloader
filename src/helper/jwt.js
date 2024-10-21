@@ -9,7 +9,6 @@ export function signToken(payload) {
             if (err) {
                 reject(new Error('payload is invalid'))
             }
-            console.log('encoded:', encoded)
             resolve(encoded)
         })
     })

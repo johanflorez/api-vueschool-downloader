@@ -14,13 +14,16 @@ export async function GetCourses(ws, data, req) {
             return el.map((e, i) => {
                 const title = e.querySelector("h3.text-xl").innerText;
                 const url = e.getAttribute("href");
+                const cat = e.querySelectorAll('div.inline-block.px-3')
+                const findLessons = e.querySelectorAll('span.mt-1')
+                const lessons = Array.from(findLessons).map((el) => el.innerText)
                 const regex = /\(\"(.*?)\"\)/;
                 const findThumbnail = e
                     .querySelector("div.thumbnail")
                     .getAttribute("style")
                     .match(regex);
                 const thumbnail = findThumbnail ? findThumbnail[1] : "";
-                return { id: i, title, url, thumbnail, checked: false };
+                return { id: i, title, url, thumbnail, checked: false, cat: cat[cat.length - 1].innerText, lessons: lessons.join(', ') };
             });
         });
         await page.close()
