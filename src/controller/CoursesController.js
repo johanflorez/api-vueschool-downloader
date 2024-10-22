@@ -78,13 +78,13 @@ export async function GetVideoLesson(ws, data, req) {
             const videoUrls = [];
             for (let j = 0; j < lessons[i].urls.length; j++) {
                 const page = await browserSession.createPage();
-                wsSend(ws, 'getEachVideo', 2, `waiting for scraping video from: ${lessons[i].urls[j]}`)
-                await page.goto(lessons[i].urls[j], { waitUntil: "networkidle2" });
-                wsSend(ws, 'getEachVideo', 2, `get url video from: ${lessons[i].urls[j]}`)
+                wsSend(ws, 'getEachVideo', 2, `waiting for scraping video from: ${lessons[i].urls[j].titleLesson}`)
+                await page.goto(lessons[i].urls[j].url, { waitUntil: "networkidle2" });
+                wsSend(ws, 'getEachVideo', 2, `get url video from: ${lessons[i].urls[j].titleLesson}`)
                 await page.waitForSelector('iframe', { timeout: 0 })
                 const video = await page.$eval("iframe", (e) => e.getAttribute("src"));
                 videoUrls.push(video);
-                wsSend(ws, 'getEachVideo', 2, `success scrap video from: ${lessons[i].urls[j]}`)
+                wsSend(ws, 'getEachVideo', 2, `success scrap video from: ${lessons[i].urls[j].titleLesson}`)
                 await page.close()
             }
             const newLesson = { ...lessons[i] };
@@ -92,7 +92,6 @@ export async function GetVideoLesson(ws, data, req) {
             videoLesson.push(newLesson);
             wsSend(ws, 'getEachVideo', 1, newLesson)
         }
-        ws.terminate()
     } catch (error) {
 
         console.log(error.message)

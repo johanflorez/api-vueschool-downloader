@@ -1,5 +1,6 @@
 import fs from "fs"
 import { execFile } from 'node:child_process';
+import wsSend from "../helper/wsSend.js";
 const batchFile = 'batch.txt'
 const libPath = './lib/'
 export function createPath(data) {
@@ -35,7 +36,7 @@ export function downloader(ws, data, req, listPath) {
         let currentIndex = 0
         function processNext() {
             if (currentIndex >= listPath.length) {
-                resolve(ws.send(JSON.stringify({ type: "downloader", msg: "download complete please check output folder" })))
+                resolve(wsSend(ws, 'downloader', 1, "download complete please check output folder"))
                 return
             }
 
@@ -65,15 +66,15 @@ export function downloader(ws, data, req, listPath) {
                 });
                 childProcess.on('close', (code) => {
                     if (code !== 0) {
-                        reject(ws.send(JSON.stringify({ type: "downloader", msg: "exit with error code " + code })))
+                        reject(wsSend(ws, 'downloader', 3, `exit with error code ${code}`))
                     } else {
-                        ws.send(JSON.stringify({ type: "downloader", msg: `Download complete for ${listPath[currentIndex]}` }));
+                        wsSend(ws, 'downloader', 2, `Download complete for ${listPath[currentIndex]}`)
                     }
                     currentIndex++
                     processNext()
                 })
             } else {
-                ws.send(JSON.stringify({ type: "downloader", msg: `Batch file not found in ${listPath[currentIndex]}` }));
+                wsSend(ws, 'downloader', 3, `Batch file not found in ${listPath[currentIndex]}`)
                 currentIndex++
                 processNext()
             }
@@ -86,9 +87,10 @@ export function downloader(ws, data, req, listPath) {
 export async function downloaderRunner(ws, data, req) {
     try {
         const listPath = await createPath(data)
+        wsSend(ws, 'downloader', 2, 'success, get all video url, trying downloading video, please wait...')
         await downloader(ws, data, req, listPath)
     } catch (error) {
         console.log(error)
-        ws.send(JSON.stringify({ type: "downloader", error: error.message }))
+        wsSend(ws, 'downloader', 3, error.message)
     }
 }
