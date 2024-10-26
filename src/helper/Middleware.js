@@ -29,6 +29,8 @@ export function websocketMiddlewareUpgrade(req, socket, head) {
 export async function websocketMiddlewareMessage(ws, data, req, next) {
     try {
         const token = data.token
+        const cancelType = data.type
+        if (cancelType == 'cancel') throw new Error('process cancelled')
         if (!token) throw new Error('token not found')
         if (existsSync('./cookies.txt')) {
             const cookieFile = readFileSync('./cookies.txt', 'utf-8')

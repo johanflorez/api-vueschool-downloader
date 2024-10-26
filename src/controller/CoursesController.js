@@ -54,7 +54,6 @@ export async function GetSelectedLesson(ws, data, req) {
                 wsSend(ws, 'getSelectedLesson', 2, `success get each lesson from: ${selectedCourses[i].title}`)
             }
             wsSend(ws, 'getSelectedLesson', 1, selectedCourses)
-            ws.terminate()
         } else {
             wsSend(ws, 'error', 0, 'select atleast one course')
         }
