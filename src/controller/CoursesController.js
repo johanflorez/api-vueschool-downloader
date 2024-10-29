@@ -72,7 +72,6 @@ export async function GetVideoLesson(ws, data, req) {
     const maxRetry = 3
     try {
         const lessons = data.videoLessons
-        const videoLesson = [];
         for (let i = 0; i < lessons.length; i++) {
             const videoUrls = [];
             for (let j = 0; j < lessons[i].urls.length; j++) {
@@ -86,10 +85,8 @@ export async function GetVideoLesson(ws, data, req) {
                 wsSend(ws, 'getEachVideo', 2, `success scrap video from: ${lessons[i].urls[j].titleLesson}`)
                 await page.close()
             }
-            const newLesson = { ...lessons[i] };
-            newLesson.videoUrls = videoUrls;
-            videoLesson.push(newLesson);
-            wsSend(ws, 'getEachVideo', 1, newLesson)
+            Object.assign(lessons[i], { videoUrls })
+            wsSend(ws, 'getEachVideo', 1, lessons)
         }
     } catch (error) {
 
