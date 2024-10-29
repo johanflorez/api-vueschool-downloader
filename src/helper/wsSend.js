@@ -3,7 +3,8 @@ export default function (ws, type, status, msg) {
         0: 'failed',
         1: 'success',
         2: 'loading',
-        3: 'error'
+        3: 'error',
+        4: 'log'
     }
     if (status in statusCode) {
         return ws.send(JSON.stringify({ type: type, status: statusCode[status], msg: msg }))

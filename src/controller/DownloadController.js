@@ -54,13 +54,13 @@ export function downloader(ws, data, req, listPath) {
                     `${listPath[currentIndex]}/video`
                 ]);
                 childProcess.stdout.on("data", (data) => {
-                    ws.send(JSON.stringify({ type: "downloader", log: data }))
+                    wsSend(ws, 'downloader', 4, data)
                 });
                 childProcess.stderr.on("data", (data) => {
-                    ws.send(JSON.stringify({ type: "downloader", log: data }))
+                    wsSend(ws, 'downloader', 4, data)
                 });
                 childProcess.on("error", (err) => {
-                    ws.send(JSON.stringify({ type: "downloader", msg: err }))
+                    wsSend(ws, 'downloader', 2, err)
                     currentIndex++
                     processNext()
                 });
@@ -68,7 +68,7 @@ export function downloader(ws, data, req, listPath) {
                     if (code !== 0) {
                         reject(wsSend(ws, 'downloader', 3, `exit with error code ${code}`))
                     } else {
-                        wsSend(ws, 'downloader', 2, `Download complete for ${listPath[currentIndex]}`)
+                        wsSend(ws, 'downloader', 4, `Download complete for ${listPath[currentIndex]}`)
                     }
                     currentIndex++
                     processNext()
@@ -87,7 +87,7 @@ export function downloader(ws, data, req, listPath) {
 export async function downloaderRunner(ws, data, req) {
     try {
         const listPath = await createPath(data)
-        wsSend(ws, 'downloader', 2, 'success, get all video url, trying downloading video, please wait...')
+        wsSend(ws, 'downloader', 4, 'success, get all video url, trying downloading video, please wait...')
         await downloader(ws, data, req, listPath)
     } catch (error) {
         console.log(error)
