@@ -37,12 +37,15 @@ export async function loginBrowser(ws, data, req) {
     try {
         const url = "https://vueschool.io/login"
         const page = await browserSession.createPage()
-
+        const payload = {
+            email: auth.email
+        }
+        const token = await signToken(payload)
         wsSend(ws, 'login', 2, 'run scraping login, please wait...')
         await page.goto(url)
         const getUrl = await page.url()
         if (getUrl != url) {
-            wsSend(ws, 'login', 2, 'redirect to home')
+            wsSend(ws, 'login', 1, token)
             ws.terminate()
             return
         }
@@ -57,16 +60,10 @@ export async function loginBrowser(ws, data, req) {
         await page.waitForNavigation();
         await page.goto("https://vueschool.io/profile/account");
 
-        console.log('get cookies scraping')
         const authCookies = await page.cookies();
 
         const saveAuthCookies = JSON.stringify(authCookies);
         writeFileSync(cookiesPath, saveAuthCookies);
-        console.log('save cookies to local')
-        const payload = {
-            email: auth.email
-        }
-        const token = await signToken(payload)
 
         wsSend(ws, 'login', 1, token)
 
