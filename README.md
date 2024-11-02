@@ -2,7 +2,8 @@
 
 This project is a web-based UI web scraper, created to address the difficulty of finding open-source projects that can download video courses from the website [Vue School](https://vueschool.io/).
 
-It uses Puppeteer as the scraper and WebSocket for communication between the backend and frontend.
+
+> works only on windows, on linux u can change yt-dlp and ffmpeg path in src/controller/DownloadController
 
 ## Getting Started
 
@@ -50,3 +51,5 @@ This software uses the following open source packages:
 - [Puppeteer](https://github.com/puppeteer/puppeteer)
 - [Node Js Websocket](https://github.com/websockets/ws)
 - [JWT](https://github.com/auth0/node-jsonwebtoken/)
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- [FFMPEG](https://www.ffmpeg.org/download.html)
