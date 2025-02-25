@@ -9,7 +9,7 @@ export function createPath(data) {
         const outputPath = "./output";
         const listPath = [];
         for (let i = 0; i < videosLesson.length; i++) {
-            const slugTitle = videosLesson[i].title.replace(/[ *]/g, "-");
+            const slugTitle = videosLesson[i].title.replace(/[<>:"/\\|?*]/g, '-').replace(/[ *]/g, '-');
             const pathFile = `${outputPath}/${slugTitle}`;
             fs.mkdirSync(pathFile, { recursive: true });
             if (fs.existsSync(pathFile)) {
