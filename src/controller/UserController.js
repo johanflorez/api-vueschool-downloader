@@ -50,12 +50,23 @@ export async function loginBrowser(ws, data, req) {
             return
         }
 
-        const emailFill = await page.$('input[type="text"]');
+        const emailFill = await page.$('input[type="email"]');
         const passwordFill = await page.$('input[type="password"]');
+
+        if (!emailFill || !passwordFill) {
+            throw new Error('Could not find login form fields');
+        }
 
         await emailFill.type(auth.email);
         await passwordFill.type(auth.password);
-        await passwordFill.press("Enter");
+        
+        // Find and click the submit button instead of pressing Enter
+        const submitButton = await page.$('button[type="submit"]');
+        if (submitButton) {
+            await submitButton.click();
+        } else {
+            await passwordFill.press("Enter");
+        }
 
         await page.waitForNavigation();
         await page.goto("https://vueschool.io/profile/account");
